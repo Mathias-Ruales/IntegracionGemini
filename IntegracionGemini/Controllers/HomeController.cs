@@ -10,18 +10,36 @@ namespace IntegracionGemini.Controllers
 {
     public class HomeController : Controller
     {
-        private iChatbotService _chatbotService;
+        private readonly Func<string, iChatbotService> _chatbotFactory;
 
-        public HomeController( iChatbotService chatbotService)
-
+        public HomeController(Func<string, iChatbotService> chatbotFactory)
         {
-            _chatbotService = chatbotService;
+            _chatbotFactory = chatbotFactory;
         }
-        public async Task<IActionResult> Index()
+
+        [HttpGet]
+        public IActionResult Index()
         {
-            string response = await _chatbotService.GetChatbotResponse("Hola, como estas?");
-            ViewBag.chatbotAnswer = response;
-            return View();
+            var model = new chatBotViewModel
+            {
+                SelectedProvider = "OpenAI" // default selection
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Index(chatBotViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Prompt))
+            {
+                model.Error = "Please enter a prompt.";
+                return View(model);
+            }
+
+            var chatbot = _chatbotFactory(model.SelectedProvider);
+            model.ChatbotResponse = await chatbot.GetChatbotResponse(model.Prompt);
+
+            return View(model);
         }
         public IActionResult Privacy()
         {

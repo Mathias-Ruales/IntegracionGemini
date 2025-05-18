@@ -1,11 +1,29 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IntegracionGemini.Models.chatBotViewModel
+
+<h2>Chatbot Interface</h2>
+
+<form method="post" asp-controller="Home" asp-action="Index">
+
+    <label>Select Chatbot Provider:</label><br />
+    @Html.DropDownListFor(m => m.SelectedProvider, Model.Providers, new { @class = "form-select" })
+
+    <br />
+
+    <label>Enter your prompt:</label><br />
+    @Html.TextAreaFor(m => m.Prompt, new { rows = "5", cols = "60", @class = "form-control" })
+
+    <br />
+
+    <button type="submit">Send</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <p style="color:red;">@Model.Error</p>
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-
-    <br></br>
-    <p> @ViewBag.chatbotanswer </p>
-</div>
+@if (!string.IsNullOrEmpty(Model.ChatbotResponse))
+{
+    <h3>Response:</h3>
+    <pre>@Model.ChatbotResponse</pre>
+}

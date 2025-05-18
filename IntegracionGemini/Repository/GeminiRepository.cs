@@ -40,7 +40,12 @@ namespace IntegracionGemini.Repository
 
             var response = await _httpClient.PostAsync(url, content);
             var answer = await response.Content.ReadAsStringAsync();
-            return answer;
+            
+            
+            dynamic jsonResponse = JsonConvert.DeserializeObject(answer);
+            string resultText = jsonResponse?.candidates?[0]?.content?.parts?[0]?.text;
+
+            return resultText ?? "No response from model.";
         }
 
         public Task<bool> SaveResponseInDatabase(string chatbotPrompt, string chatbotResponse)

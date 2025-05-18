@@ -5,7 +5,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<iChatbotService, GeminiRepository>();
+builder.Services.AddScoped<GeminiRepository>();
+builder.Services.AddScoped<OpenAIRepository>();
+
+// Register a factory delegate that returns the right service
+builder.Services.AddScoped<Func<string, iChatbotService>>(serviceProvider => key =>
+{
+    return key switch
+    {
+        "Gemini" => serviceProvider.GetRequiredService<GeminiRepository>(),
+        "OpenAI" => serviceProvider.GetRequiredService<OpenAIRepository>(),
+        _ => throw new ArgumentException("Invalid chatbot provider", nameof(key))
+    };
+});
+
 
 var app = builder.Build();
 
